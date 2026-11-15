@@ -2,25 +2,61 @@
 <html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>6 AI แชทบน Colab · AIoT Cucumber Classroom</title>
-<link rel="stylesheet" href="../assets/style.css"></head>
-<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html" class=on>6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<script>document.documentElement.classList.add('js')</script></head>
+<body><div class="bar"></div><nav><a class="brand" href="../index.html"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-28 16 16)"><rect x="2" y="11.5" width="28" height="9" rx="4.5" fill="currentColor"/><circle cx="10" cy="16" r="1.2" fill="var(--paper)"/><circle cx="16" cy="16" r="1.2" fill="var(--paper)"/><circle cx="22" cy="16" r="1.2" fill="var(--paper)"/></g></svg><span>AIoT Cucumber<small>Classroom</small></span></a><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html" class=on>6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a><a href="../setup.html">เตรียมเครื่องมือ</a><a href="../no-board.html">ไม่มีบอร์ด ใช้ตัวจำลอง</a><a href="../challenges.html">ปรับแก้และต่อยอด</a><a href="../troubleshooting.html">แก้ปัญหา</a><a href="../security.html">ความปลอดภัย</a><a href="../references.html">แหล่งอ้างอิง</a>
 <a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
-<main><h1>6 AI แชทบน Colab</h1>
-<p>AI แบบที่สองคือ <b>LLM</b> (โมเดลภาษาขนาดใหญ่) ที่อ่านค่าเซนเซอร์ล่าสุดแล้วตอบคำถามเป็นภาษาไทย เช่น "ตอนนี้ร้อนไหม" "มีอะไรผิดปกติหรือเปล่า"</p>
-<h2>เลือกที่รัน AI</h2>
-<table>
-<tr><th>ที่รัน</th><th>เหมาะกับ</th><th>วิธี</th></tr>
-<tr><td>Google Colab</td><td>เครื่องไม่แรง ไม่มี GPU</td><td>เปิดโน้ตบุ๊ก <code>ai/colab/cucumber_llm.ipynb</code> เลือก GPU T4 รันทุกเซลล์ จะได้ลิงก์ <code>trycloudflare.com</code></td></tr>
-<tr><td>คอมพิวเตอร์เอง</td><td>มี RAM ≥ 8 GB</td><td>ติดตั้ง Ollama แล้ว <code>ollama pull qwen2.5:3b</code> ใช้ <code>OLLAMA_URL=http://host.docker.internal:11434</code></td></tr>
-<tr><td>ไม่รัน LLM</td><td>ไม่มีเน็ต/ไม่อยากตั้งค่า</td><td>เว้น <code>OLLAMA_URL</code> ว่าง ระบบตอบด้วยกฎง่ายๆ</td></tr>
-</table>
-<p>เมื่อได้ลิงก์ ใส่ใน <code>gateway/.env</code> แล้วรีสตาร์ท</p>
-<pre><code>OLLAMA_URL=https://xxxx.trycloudflare.com
+<main><header class="ph"><p class="no">บทที่ 6</p><h1>AI แชทบน Colab</h1></header>
+<p>AI แบบที่สองคือ <b>LLM</b> (โมเดลภาษาขนาดใหญ่) ที่อ่านค่าเซนเซอร์ล่าสุดแล้วตอบคำถามเป็นภาษาไทย
+โมเดลใหญ่ต้องใช้การ์ดจอ เราจึงยืม <b>GPU ฟรีของ Google Colab</b> แล้วให้ gateway เรียกผ่านลิงก์</p>
+
+<h2>ลองเล่นก่อน: กฎ กับ LLM ต่างกันอย่างไร</h2>
+<p>ช่องนี้ใช้ ‘กฎ’ ตอบ (แบบเดียวกับที่ gateway ใช้ตอนไม่มี LLM) ส่วนด้านล่างคือข้อความที่จะส่งให้ LLM จริง
+ลองถามคำถามที่กฎไม่รู้ เช่น “พรุ่งนี้อากาศเป็นยังไง”</p>
+<div data-play="chat"></div>
+
+<h2>เปิดใช้ LLM บน Colab ในห้าขั้นตอน</h2>
+<p><a class="colab" href="https://colab.research.google.com/github/arefandywae-lab/aiot-cucumber-classroom/blob/main/ai/colab/cucumber_llm.ipynb" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.9 5.1a7 7 0 0 0-9.8 0l1.7 1.7a4.6 4.6 0 0 1 6.4 0l1.7-1.7Zm-9.8 13.8a7 7 0 0 0 9.8 0l-1.7-1.7a4.6 4.6 0 0 1-6.4 0l-1.7 1.7ZM5.1 7.1a7 7 0 0 0 0 9.8l1.7-1.7a4.6 4.6 0 0 1 0-6.4L5.1 7.1Zm13.8 9.8a7 7 0 0 0 0-9.8l-1.7 1.7a4.6 4.6 0 0 1 0 6.4l1.7 1.7Z"/></svg>เปิดโน้ตบุ๊ก LLM บน Colab</a></p>
+<ol class="setup">
+<li><b>เปิดโน้ตบุ๊ก</b>กดปุ่มด้านบน (ต้องล็อกอินบัญชี Google) ไม่ต้องดาวน์โหลดหรือติดตั้งอะไร</li>
+<li><b>เลือก GPU</b>เมนู <b>Runtime → Change runtime type → T4 GPU</b> แล้วกด Save</li>
+<li><b>กด Run all</b>เมนู <b>Runtime → Run all</b> เซลล์ติดตั้งใช้เวลา 3–6 นาทีครั้งแรก
+ (เซลล์ที่ 3 จะตอบ "ตอนนี้ร้อนไหม" ให้ดูว่าโมเดลใช้ได้)</li>
+<li><b>คัดลอกลิงก์</b>เลื่อนไปเซลล์สุดท้าย จะมีข้อความ ✅ พร้อมบรรทัด <code>OLLAMA_URL=...</code> คัดลอกสองบรรทัดนั้น
+ แล้ว <b>ปล่อยเซลล์ให้รันค้างไว้ อย่าปิดแท็บ</b></li>
+<li><b>บอก gateway</b>วางลงใน <code>gateway/.env</code> แล้วรีสตาร์ท</li>
+</ol>
+<pre><code># gateway/.env
+OLLAMA_URL=https://xxxx.trycloudflare.com
 OLLAMA_MODEL=qwen2.5:3b</code></pre><pre><code>docker compose up -d mqtt_collector</code></pre>
+<p>เปิดหน้าเว็บแล้วถามในช่องแชท ใต้คำตอบจะบอกเสมอว่า <b>ตอบโดย LLM</b> หรือ <b>ตอบโดยกฎ</b></p>
+
+<h2>ตรวจว่าเชื่อมสำเร็จ</h2>
+<ul class="check">
+<li>เซลล์ที่ 3 ใน Colab พิมพ์คำตอบภาษาไทยออกมา</li>
+<li><code>curl https://xxxx.trycloudflare.com/api/tags</code> ตอบรายชื่อโมเดล (รันจากเครื่องคุณ)</li>
+<li>หน้าเว็บ: ถามแล้วใต้คำตอบขึ้น “ตอบโดย LLM”</li>
+<li>ถ้ายังขึ้น “ตอบโดยกฎ” ดูวิธีแก้ที่ <a href="../troubleshooting.html">แก้ปัญหา</a></li>
+</ul>
+
+<h2>ทดลอง: ทำให้ AI ดีขึ้น (หรือพังให้ดู)</h2>
+<p>ในโน้ตบุ๊กมีเซลล์ <b>ลองเล่น</b> ที่ปรับคำถาม ค่าเซนเซอร์ และ system prompt ได้โดยไม่ต้องแก้โค้ด</p>
+<table>
+<tr><th>ทดลอง</th><th>สังเกตอะไร</th></tr>
+<tr><td>ถาม “พรุ่งนี้ฝนตกไหม” ด้วย system prompt เดิม</td><td>โมเดลยอมรับว่าข้อมูลไม่พอ หรือเดามั่ว</td></tr>
+<tr><td>ลบประโยค “ห้ามเดาตัวเลข” ออกแล้วถามซ้ำ</td><td>คำตอบเริ่มมีตัวเลขที่ไม่มีในข้อมูลไหม</td></tr>
+<tr><td>ติ๊ก “ตรวจพบความผิดปกติ” แล้วถาม “มีอะไรน่ากังวลไหม”</td><td>โมเดลใช้ผลของ AI ตัวแรก (z-score) ได้ถูกต้องไหม</td></tr>
+<tr><td>เปลี่ยนโมเดลเป็น <code>qwen2.5:1.5b</code></td><td>เร็วขึ้นแต่ตอบแย่ลงไหม</td></tr>
+<tr><td>ถามภาษาอังกฤษ หรือถามเรื่องไม่เกี่ยวกับอากาศ</td><td>โมเดลอยู่ในกรอบที่ตั้งไว้ไหม</td></tr>
+</table>
+<div class="try"><b>ไม่อยากใช้ Colab</b> ติดตั้ง Ollama บนเครื่อง (RAM ตั้งแต่ 8 GB) รัน <code>ollama pull qwen2.5:3b</code>
+แล้วตั้ง <code>OLLAMA_URL=http://host.docker.internal:11434</code> หรือเว้นว่างไว้ ระบบจะตอบด้วยกฎอัตโนมัติ ไม่พัง</div>
+
 <h2>มันตอบจากอะไร</h2>
-<p>gateway ไม่ได้ให้ LLM "เดา" แต่ส่งค่าเซนเซอร์ล่าสุดและผลตรวจผิดปกติไปในคำถามด้วย (เรียกว่า <i>grounding</i>)
-พร้อมคำสั่งให้ตอบจากข้อมูลที่ให้เท่านั้น ใต้คำตอบจะบอกเสมอว่า "ตอบโดย LLM" หรือ "ตอบโดยกฎง่ายๆ"</p>
-<div class="try"><b>ลองทำ</b> ถามว่า "ตอนนี้ร้อนไหม" "ความชื้นเท่าไหร่" "พรุ่งนี้ฝนตกไหม" แล้วสังเกตว่าคำถามสุดท้ายโมเดลควรบอกว่าข้อมูลไม่พอ ไม่ใช่เดาตัวเลข</div>
-<div class="warn"><b>ระวัง</b> ลิงก์ Colab ใครได้ไปก็ใช้โมเดลของคุณได้ อย่าแชร์ต่อ และ LLM ตอบผิดได้ ใช้ช่วยอธิบายเท่านั้น
-อย่าใช้ตัดสินใจเรื่องความปลอดภัย</div>
-<div class="steps"><a href="5-ai-anomaly.html">← บทก่อนหน้า</a></div></main></body></html>
+<p>gateway ไม่ได้ให้ LLM “เดา” แต่ส่งค่าเซนเซอร์ล่าสุดและผลตรวจผิดปกติไปในคำถามด้วย (ดูกล่อง prompt ในสนามเล่นด้านบน)
+พร้อมคำสั่งให้ตอบจากข้อมูลที่ให้เท่านั้น เทคนิคนี้เรียกว่า <b>grounding</b> ช่วยลดการเดามั่ว แต่ไม่ได้กำจัดหมด</p>
+<div class="warn"><b>ระวัง</b> ลิงก์ Colab ใครได้ไปก็ใช้โมเดลของคุณได้ อย่าแชร์ต่อ ข้อความแชตผ่านเซิร์ฟเวอร์ของ Google/Cloudflare
+อย่าพิมพ์ข้อมูลส่วนตัว และ LLM ตอบผิดได้ อย่าใช้ตัดสินใจเรื่องความปลอดภัย</div>
+<h2>ทบทวน</h2><details class="ans"><summary>ทำไมต้องส่งค่าเซนเซอร์ไปพร้อมคำถาม แทนที่จะถามโมเดลตรงๆ</summary><p>โมเดลไม่รู้ค่าจริงของห้องเรา ถ้าไม่ส่งไปจะเดา การส่งข้อมูลจริงให้ (grounding) ทำให้คำตอบอิงข้อเท็จจริง</p></details><details class="ans"><summary>ทำไมต้องมีกฎสำรองเมื่อ LLM ใช้ไม่ได้</summary><p>ระบบต้องไม่พังเมื่อส่วนใดส่วนหนึ่งล่ม Colab ฟรีหยุดเองได้ จึงออกแบบให้ล้มเหลวอย่างปลอดภัย</p></details><details class="ans"><summary>ถ้า LLM บอกว่า ‘ไม่มีความผิดปกติ’ แต่ z-score เตือน ควรเชื่ออะไร</summary><p>ผลคำนวณจาก z-score ตรวจสอบย้อนได้ ส่วน LLM อาจตอบผิด จึงควรเชื่อตัวเลขที่คำนวณได้ก่อนแล้วไปดูว่าทำไม LLM ตอบต่าง</p></details><div class="steps"><a href="5-ai-anomaly.html">← บทก่อนหน้า</a><a href="../challenges.html" style="margin-left:auto">บทถัดไป →</a></div></main><script src="../assets/fx.js" defer></script><script src="../assets/play.js" defer></script></body></html>

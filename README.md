@@ -12,10 +12,13 @@
 | ส่วน | อยู่ที่ | ทำอะไร |
 |---|---|---|
 | `devices/cucumber/` | PlatformIO / Arduino | อ่าน BMP280 + HTS221 ส่ง MQTT ทุก 3 วินาที |
-| `devices/simulator.py` | Python | ส่งข้อมูลจำลองแทนบอร์ด |
+| `devices/simulator.py` | Python | ส่งข้อมูลจำลองแทนบอร์ด (ค่าเดียว) |
+| `devices/scenario.py` | Python | จำลองเหตุการณ์ต่อเนื่อง normal / jump / drift มีสัญญาณรบกวน |
 | `gateway/` | Docker Compose | Mosquitto + FastAPI + SQLite + หน้าเว็บ/บอท Telegram |
 | `gateway/mqtt_collector/ai_helpers.py` | Python | AI #1 z-score ตรวจผิดปกติ, AI #2 แชท (LLM + กฎสำรอง) |
-| `ai/colab/cucumber_llm.ipynb` | Colab | รัน LLM (Ollama, Qwen2.5 3B) พร้อมลิงก์สาธารณะ |
+| `ai/colab/cucumber_llm.ipynb` | Colab | รัน LLM (Ollama, Qwen2.5 3B) พร้อมลิงก์สาธารณะ และเซลล์ให้ลองเล่น |
+| `ai/colab/anomaly_playground.ipynb` | Colab | สนามเล่น z-score ไม่ต้องมี GPU/บอร์ด |
+| `tools/make_notebooks.py` | Python | สร้างโน้ตบุ๊กทั้งสองจากโค้ดอ่านง่าย |
 | `docs/` | HTML | เว็บคอร์ส 7 บทเรียน + หน้าสำหรับครู (สร้างจาก `tools/build_site.py`) |
 
 ## เริ่มเร็ว (ไม่ต้องมีบอร์ด)
