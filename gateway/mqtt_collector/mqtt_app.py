@@ -19,10 +19,12 @@ def on_message(client, userdata, msg):
         node, value = payload['node'], payload['value']
         if node not in (1, 2, 3, 4) or isinstance(node, bool):
             raise ValueError("unknown node")
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-            raise ValueError("value must be a finite number")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("value must be a number")
+        if abs(value) > 1e9 or not math.isfinite(value):  # abs() first: huge ints would overflow isfinite()
+            raise ValueError("value out of range")
         values = (node, float(value))
-    except (ValueError, KeyError, TypeError, UnicodeDecodeError) as exc:
+    except (ValueError, KeyError, TypeError, OverflowError, UnicodeDecodeError) as exc:
         print(f"Ignoring invalid message: {exc}")
         return
     conn = sqlite3.connect("data.db")

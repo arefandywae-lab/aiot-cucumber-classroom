@@ -132,22 +132,39 @@ def anomaly(minutes: int = 60):
     return {"minutes": minutes, "results": ai_helpers.detect_anomalies(_series(minutes))}
 
 
-_ask_times = []  # timestamps of recent /api/ask calls (simple global rate limit)
+_ask_times = {}  # client ip -> timestamps of its recent /api/ask calls
 ASK_LIMIT_PER_MIN = int(os.environ.get("ASK_LIMIT_PER_MIN", "12"))
+
+
+def _client_ip(request: Request):
+    # behind ngrok the real client is the first X-Forwarded-For entry
+    fwd = request.headers.get("x-forwarded-for", "")
+    return fwd.split(",")[0].strip() or (request.client.host if request.client else "?")
+
+
+def _ask_allowed(ip):
+    now = time.time()
+    if len(_ask_times) > 1000:  # keep memory bounded
+        for k in [k for k, v in _ask_times.items() if not v or now - v[-1] > 60]:
+            del _ask_times[k]
+    recent = [x for x in _ask_times.get(ip, []) if now - x < 60]
+    if len(recent) >= ASK_LIMIT_PER_MIN:
+        _ask_times[ip] = recent
+        return False
+    recent.append(now)
+    _ask_times[ip] = recent
+    return True
 
 
 @app.post("/api/ask")
 async def ask(request: Request):
     """AI #2 - chat about the sensors. Uses an LLM (OLLAMA_URL) if available, otherwise simple rules."""
-    now = time.time()
-    _ask_times[:] = [x for x in _ask_times if now - x < 60]
-    if len(_ask_times) >= ASK_LIMIT_PER_MIN:
-        raise HTTPException(429, "ถามถี่เกินไป รอสักครู่แล้วลองใหม่")
-    _ask_times.append(now)
     body = await request.json()
     question = str(body.get("question", "")).strip()[:300]
     if not question:
         raise HTTPException(400, "question is empty")
+    if not _ask_allowed(_client_ip(request)):  # counted only after the request is valid
+        raise HTTPException(429, "ถามถี่เกินไป รอสักครู่แล้วลองใหม่")
     anomalies = ai_helpers.detect_anomalies(_series(60))
     return ai_helpers.answer_question(question, _latest(), anomalies)
 
