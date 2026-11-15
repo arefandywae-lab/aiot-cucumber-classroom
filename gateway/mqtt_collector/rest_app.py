@@ -1,3 +1,4 @@
+import collections
 import hashlib
 import hmac
 import json
@@ -132,28 +133,34 @@ def anomaly(minutes: int = 60):
     return {"minutes": minutes, "results": ai_helpers.detect_anomalies(_series(minutes))}
 
 
-_ask_times = {}  # client ip -> timestamps of its recent /api/ask calls
+_ask_times = collections.OrderedDict()  # client ip -> recent call times; fixed capacity, oldest evicted
+_ask_all = []                            # all recent call times (global backstop)
 ASK_LIMIT_PER_MIN = int(os.environ.get("ASK_LIMIT_PER_MIN", "12"))
+ASK_GLOBAL_PER_MIN = int(os.environ.get("ASK_GLOBAL_PER_MIN", "60"))
+ASK_MAP_MAX = 1000
 
 
 def _client_ip(request: Request):
-    # behind ngrok the real client is the first X-Forwarded-For entry
-    fwd = request.headers.get("x-forwarded-for", "")
-    return fwd.split(",")[0].strip() or (request.client.host if request.client else "?")
+    # Behind ngrok the proxy appends the real client IP as the LAST X-Forwarded-For entry,
+    # anything before it was supplied by the client and cannot be trusted.
+    fwd = [x.strip() for x in request.headers.get("x-forwarded-for", "").split(",") if x.strip()]
+    return fwd[-1] if fwd else (request.client.host if request.client else "?")
 
 
 def _ask_allowed(ip):
     now = time.time()
-    if len(_ask_times) > 1000:  # keep memory bounded
-        for k in [k for k, v in _ask_times.items() if not v or now - v[-1] > 60]:
-            del _ask_times[k]
-    recent = [x for x in _ask_times.get(ip, []) if now - x < 60]
-    if len(recent) >= ASK_LIMIT_PER_MIN:
-        _ask_times[ip] = recent
+    _ask_all[:] = [x for x in _ask_all if now - x < 60]
+    if len(_ask_all) >= ASK_GLOBAL_PER_MIN:
         return False
-    recent.append(now)
-    _ask_times[ip] = recent
-    return True
+    recent = [x for x in _ask_times.pop(ip, []) if now - x < 60]
+    allowed = len(recent) < ASK_LIMIT_PER_MIN
+    if allowed:
+        recent.append(now)
+        _ask_all.append(now)
+    _ask_times[ip] = recent          # re-insert = most recently used
+    while len(_ask_times) > ASK_MAP_MAX:
+        _ask_times.popitem(last=False)
+    return allowed
 
 
 @app.post("/api/ask")
