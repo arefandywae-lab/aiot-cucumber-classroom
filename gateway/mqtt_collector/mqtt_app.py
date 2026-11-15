@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 import sqlite3
 import json
+import math
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code, properties):
@@ -15,8 +16,13 @@ def on_message(client, userdata, msg):
         payload = json.loads(msg.payload)
         if not isinstance(payload, dict):
             raise ValueError("Expected a JSON object")
-        values = (payload['node'], payload['value'])
-    except (ValueError, KeyError, UnicodeDecodeError) as exc:
+        node, value = payload['node'], payload['value']
+        if node not in (1, 2, 3, 4) or isinstance(node, bool):
+            raise ValueError("unknown node")
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            raise ValueError("value must be a finite number")
+        values = (node, float(value))
+    except (ValueError, KeyError, TypeError, UnicodeDecodeError) as exc:
         print(f"Ignoring invalid message: {exc}")
         return
     conn = sqlite3.connect("data.db")

@@ -198,7 +198,7 @@ page("lessons/4-ui.html", "4 หน้าเว็บและ Telegram", """
 <li>ใส่ <code>TELEGRAM_BOT_TOKEN</code> และ <code>MINIAPP_URL</code> (ลิงก์ https จาก ngrok) ใน <code>gateway/.env</code></li>
 <li><code>docker compose up -d mqtt_collector</code> แล้วเปิดแชทกับบอท กดปุ่ม <b>Sensors</b> หรือพิมพ์ <code>/app</code></li>
 </ol>
-<div class="warn"><b>ระวัง</b> token ของบอทเหมือนรหัสผ่าน อย่าส่งให้ใครหรืออัปโหลดขึ้น GitHub
+<div class="warn"><b>ตั้ง <code>TELEGRAM_ALLOWED_CHAT_ID</code> ด้วย</b> ไม่งั้นคนแรกที่ส่ง <code>/start</code> ให้บอทจะกลายเป็นเจ้าของ (หา chat id จาก <code>@userinfobot</code>)<br><b>ระวัง</b> token ของบอทเหมือนรหัสผ่าน อย่าส่งให้ใครหรืออัปโหลดขึ้น GitHub
 ลิงก์ ngrok แบบฟรีจะเปลี่ยนทุกครั้งที่เปิดใหม่ ต้องแก้ <code>MINIAPP_URL</code> ใหม่</div>
 <h2>แล้วใครเปิดหน้านี้ได้บ้าง</h2>
 <p>ใครมีลิงก์ก็เปิดดูได้ แต่ Telegram จะแนบข้อมูลผู้ใช้ที่ <b>เซ็นลายเซ็นไว้</b> มาด้วย gateway ตรวจลายเซ็นนั้นที่ <code>/api/verify</code>
@@ -292,7 +292,8 @@ page("teachers.html", "สำหรับครู", """
 </table>
 <h2>ความปลอดภัยและข้อมูลส่วนบุคคล</h2>
 <ul>
-<li>Mosquitto ในโปรเจกต์เปิดแบบไม่ต้องล็อกอิน เหมาะกับห้องเรียนเท่านั้น อย่าเปิด port 1883 สู่อินเทอร์เน็ต</li>
+<li>Mosquitto ในโปรเจกต์เปิดแบบไม่ต้องล็อกอิน (<code>allow_anonymous true</code>) เพื่อให้บอร์ดต่อง่าย เหมาะกับห้องเรียนเท่านั้น อย่าเปิด port 1883 สู่อินเทอร์เน็ต ใครอยู่ WiFi เดียวกันสามารถส่งข้อมูลปลอมเข้ามาได้ gateway จึงรับเฉพาะ node 1–4 และค่าตัวเลขที่ถูกต้อง</li>
+<li>API เปิดให้ใครมีลิงก์ก็อ่านได้ (ข้อมูลเป็นสภาพอากาศเท่านั้น) <code>/api/ask</code> จำกัด 12 ครั้ง/นาที และ CORS อนุญาตเฉพาะ GitHub Pages ของโปรเจกต์ ถ้าเปิดลิงก์ ngrok ให้คนอื่น ให้ปิด ngrok เมื่อเลิกใช้</li>
 <li>เก็บ token/รหัส WiFi ใน <code>.env</code> และ <code>secrets.h</code> ซึ่งไม่ถูกอัปโหลดขึ้น GitHub</li>
 <li>ข้อมูลที่เก็บเป็นค่าสภาพอากาศเท่านั้น ไม่มีข้อมูลระบุตัวบุคคล</li>
 </ul>

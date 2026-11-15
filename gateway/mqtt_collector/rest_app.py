@@ -16,7 +16,7 @@ from contextlib import closing
 
 app = FastAPI()
 # The web UI on GitHub Pages is served from another origin, so allow cross-origin reads.
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=[o.strip() for o in os.environ.get("CORS_ORIGINS", "https://arefandywae-lab.github.io").split(",") if o.strip()], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 with closing(sqlite3.connect("data.db")) as conn:
     sqlcmd = ("CREATE TABLE IF NOT EXISTS data ("
@@ -49,6 +49,7 @@ def read_item(item_id: int):
 
 @app.get("/log")
 def read_log(limit: int = 30):
+    limit = max(1, min(limit, 500))
     with closing(sqlite3.connect("data.db")) as conn:
         sqlcmd = 'SELECT _id, node, value, ts FROM data ORDER BY _id DESC LIMIT ?;'
         rows = conn.execute(sqlcmd, (limit,)).fetchall()
@@ -131,9 +132,18 @@ def anomaly(minutes: int = 60):
     return {"minutes": minutes, "results": ai_helpers.detect_anomalies(_series(minutes))}
 
 
+_ask_times = []  # timestamps of recent /api/ask calls (simple global rate limit)
+ASK_LIMIT_PER_MIN = int(os.environ.get("ASK_LIMIT_PER_MIN", "12"))
+
+
 @app.post("/api/ask")
 async def ask(request: Request):
     """AI #2 - chat about the sensors. Uses an LLM (OLLAMA_URL) if available, otherwise simple rules."""
+    now = time.time()
+    _ask_times[:] = [x for x in _ask_times if now - x < 60]
+    if len(_ask_times) >= ASK_LIMIT_PER_MIN:
+        raise HTTPException(429, "ถามถี่เกินไป รอสักครู่แล้วลองใหม่")
+    _ask_times.append(now)
     body = await request.json()
     question = str(body.get("question", "")).strip()[:300]
     if not question:

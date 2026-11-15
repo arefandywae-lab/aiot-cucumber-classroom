@@ -18,7 +18,7 @@
 <li>ใส่ <code>TELEGRAM_BOT_TOKEN</code> และ <code>MINIAPP_URL</code> (ลิงก์ https จาก ngrok) ใน <code>gateway/.env</code></li>
 <li><code>docker compose up -d mqtt_collector</code> แล้วเปิดแชทกับบอท กดปุ่ม <b>Sensors</b> หรือพิมพ์ <code>/app</code></li>
 </ol>
-<div class="warn"><b>ระวัง</b> token ของบอทเหมือนรหัสผ่าน อย่าส่งให้ใครหรืออัปโหลดขึ้น GitHub
+<div class="warn"><b>ตั้ง <code>TELEGRAM_ALLOWED_CHAT_ID</code> ด้วย</b> ไม่งั้นคนแรกที่ส่ง <code>/start</code> ให้บอทจะกลายเป็นเจ้าของ (หา chat id จาก <code>@userinfobot</code>)<br><b>ระวัง</b> token ของบอทเหมือนรหัสผ่าน อย่าส่งให้ใครหรืออัปโหลดขึ้น GitHub
 ลิงก์ ngrok แบบฟรีจะเปลี่ยนทุกครั้งที่เปิดใหม่ ต้องแก้ <code>MINIAPP_URL</code> ใหม่</div>
 <h2>แล้วใครเปิดหน้านี้ได้บ้าง</h2>
 <p>ใครมีลิงก์ก็เปิดดูได้ แต่ Telegram จะแนบข้อมูลผู้ใช้ที่ <b>เซ็นลายเซ็นไว้</b> มาด้วย gateway ตรวจลายเซ็นนั้นที่ <code>/api/verify</code>
