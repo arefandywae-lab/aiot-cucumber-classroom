@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 AI แชทบน Colab · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html" class=on>6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>6 AI แชทบน Colab</h1>
+<p>AI แบบที่สองคือ <b>LLM</b> (โมเดลภาษาขนาดใหญ่) ที่อ่านค่าเซนเซอร์ล่าสุดแล้วตอบคำถามเป็นภาษาไทย เช่น "ตอนนี้ร้อนไหม" "มีอะไรผิดปกติหรือเปล่า"</p>
+<h2>เลือกที่รัน AI</h2>
+<table>
+<tr><th>ที่รัน</th><th>เหมาะกับ</th><th>วิธี</th></tr>
+<tr><td>Google Colab</td><td>เครื่องไม่แรง ไม่มี GPU</td><td>เปิดโน้ตบุ๊ก <code>ai/colab/cucumber_llm.ipynb</code> เลือก GPU T4 รันทุกเซลล์ จะได้ลิงก์ <code>trycloudflare.com</code></td></tr>
+<tr><td>คอมพิวเตอร์เอง</td><td>มี RAM ≥ 8 GB</td><td>ติดตั้ง Ollama แล้ว <code>ollama pull qwen2.5:3b</code> ใช้ <code>OLLAMA_URL=http://host.docker.internal:11434</code></td></tr>
+<tr><td>ไม่รัน LLM</td><td>ไม่มีเน็ต/ไม่อยากตั้งค่า</td><td>เว้น <code>OLLAMA_URL</code> ว่าง ระบบตอบด้วยกฎง่ายๆ</td></tr>
+</table>
+<p>เมื่อได้ลิงก์ ใส่ใน <code>gateway/.env</code> แล้วรีสตาร์ท</p>
+<pre><code>OLLAMA_URL=https://xxxx.trycloudflare.com
+OLLAMA_MODEL=qwen2.5:3b</code></pre><pre><code>docker compose up -d mqtt_collector</code></pre>
+<h2>มันตอบจากอะไร</h2>
+<p>gateway ไม่ได้ให้ LLM "เดา" แต่ส่งค่าเซนเซอร์ล่าสุดและผลตรวจผิดปกติไปในคำถามด้วย (เรียกว่า <i>grounding</i>)
+พร้อมคำสั่งให้ตอบจากข้อมูลที่ให้เท่านั้น ใต้คำตอบจะบอกเสมอว่า "ตอบโดย LLM" หรือ "ตอบโดยกฎง่ายๆ"</p>
+<div class="try"><b>ลองทำ</b> ถามว่า "ตอนนี้ร้อนไหม" "ความชื้นเท่าไหร่" "พรุ่งนี้ฝนตกไหม" แล้วสังเกตว่าคำถามสุดท้ายโมเดลควรบอกว่าข้อมูลไม่พอ ไม่ใช่เดาตัวเลข</div>
+<div class="warn"><b>ระวัง</b> ลิงก์ Colab ใครได้ไปก็ใช้โมเดลของคุณได้ อย่าแชร์ต่อ และ LLM ตอบผิดได้ ใช้ช่วยอธิบายเท่านั้น
+อย่าใช้ตัดสินใจเรื่องความปลอดภัย</div>
+<div class="steps"><a href="5-ai-anomaly.html">← บทก่อนหน้า</a></div></main></body></html>

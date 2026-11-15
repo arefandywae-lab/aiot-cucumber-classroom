@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 หน้าเว็บและ Telegram · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html" class=on>4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>4 หน้าเว็บและ Telegram</h1>
+<p>หน้าเว็บ (<code>gateway/mqtt_collector/miniapp.html</code>) เขียนด้วย HTML/CSS/JavaScript ล้วน ไม่มีไลบรารีเพิ่ม
+ดึงข้อมูลจาก <code>/api/summary</code> ทุก 3 วินาที แล้ววาดการ์ดกับกราฟ</p>
+<h2>ทางเลือก A: เปิดในเบราว์เซอร์</h2>
+<p>เปิด <code>http://localhost:5001/app</code> บนคอมพิวเตอร์ หรือถ้าอยากดูบนมือถือที่อยู่ WiFi เดียวกัน ใช้ <code>http://IP-ของคอม:5001/app</code></p>
+<h2>ทางเลือก B: Telegram Mini App</h2>
+<p>Telegram บังคับให้เป็น <b>https</b> เราจึงต้องมีลิงก์สาธารณะ ใช้ ngrok ทำ port forwarding:</p>
+<pre><code>ngrok http 5001</code></pre>
+<ol>
+<li>คุยกับ <code>@BotFather</code> พิมพ์ <code>/newbot</code> เพื่อได้ token</li>
+<li>ใส่ <code>TELEGRAM_BOT_TOKEN</code> และ <code>MINIAPP_URL</code> (ลิงก์ https จาก ngrok) ใน <code>gateway/.env</code></li>
+<li><code>docker compose up -d mqtt_collector</code> แล้วเปิดแชทกับบอท กดปุ่ม <b>Sensors</b> หรือพิมพ์ <code>/app</code></li>
+</ol>
+<div class="warn"><b>ระวัง</b> token ของบอทเหมือนรหัสผ่าน อย่าส่งให้ใครหรืออัปโหลดขึ้น GitHub
+ลิงก์ ngrok แบบฟรีจะเปลี่ยนทุกครั้งที่เปิดใหม่ ต้องแก้ <code>MINIAPP_URL</code> ใหม่</div>
+<h2>แล้วใครเปิดหน้านี้ได้บ้าง</h2>
+<p>ใครมีลิงก์ก็เปิดดูได้ แต่ Telegram จะแนบข้อมูลผู้ใช้ที่ <b>เซ็นลายเซ็นไว้</b> มาด้วย gateway ตรวจลายเซ็นนั้นที่ <code>/api/verify</code>
+(ดูฟังก์ชัน <code>check_init_data</code> ใน <code>rest_app.py</code>) เพื่อรู้ว่าเปิดมาจาก Telegram จริง</p>
+<h2>ใช้หน้าเว็บจาก GitHub Pages</h2>
+<p>หน้าเว็บชุดเดียวกันอยู่ที่ <code>app/</code> ของเว็บนี้ ต่อกับ gateway ของคุณผ่านพารามิเตอร์ <code>?api=</code> เช่น
+<code>app/?api=https://xxxx.ngrok-free.app</code></p>
+<div class="steps"><a href="3-gateway.html">← บทก่อนหน้า</a><a href="5-ai-anomaly.html" style="margin-left:auto">บทถัดไป →</a></div></main></body></html>

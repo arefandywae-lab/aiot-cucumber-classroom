@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cucumber Sensors</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  /* Colors come from Telegram's theme variables, with fallbacks for a plain browser */
+  :root {
+    --bg: var(--tg-theme-bg-color, #ffffff);
+    --bg2: var(--tg-theme-secondary-bg-color, #f1f5f9);
+    --text: var(--tg-theme-text-color, #0f172a);
+    --hint: var(--tg-theme-hint-color, #64748b);
+    --accent: var(--tg-theme-button-color, #2481cc);
+    --accent-text: var(--tg-theme-button-text-color, #ffffff);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    background: var(--bg2); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Sarabun, sans-serif;
+  }
+  h1 { font-size: 1.15rem; margin: 0 0 2px; }
+  .sub { color: var(--hint); font-size: .8rem; margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .card { background: var(--bg); border-radius: 14px; padding: 12px 14px; }
+  .card .name { color: var(--hint); font-size: .75rem; margin-bottom: 6px; }
+  .card .val { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+  .card .unit { font-size: .9rem; color: var(--hint); margin-left: 3px; }
+  .card .age { color: var(--hint); font-size: .7rem; margin-top: 6px; }
+  .card.hot .val { color: #ef4444; }
+  .card.stale { opacity: .45; }
+  .panel { background: var(--bg); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+  .panel h2 { font-size: .85rem; margin: 0 0 8px; color: var(--hint); font-weight: 600; }
+  svg { width: 100%; height: 90px; display: block; }
+  .range { display: flex; gap: 6px; margin-bottom: 14px; }
+  .range button {
+    flex: 1; padding: 8px 0; border: 0; border-radius: 10px; font-size: .85rem;
+    background: var(--bg); color: var(--text);
+  }
+  .range button.on { background: var(--accent); color: var(--accent-text); }
+  .foot { color: var(--hint); font-size: .72rem; text-align: center; }
+  #who.ok { color: #16a34a; }
+  .ai .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: .8rem; margin: 0 6px 6px 0; background: #dcfce7; color: #166534; }
+  .ai .badge.bad { background: #fee2e2; color: #991b1b; }
+  .ai .badge.wait { background: var(--bg2); color: var(--hint); }
+  .chat { display: flex; gap: 6px; margin-top: 6px; }
+  .chat input { flex: 1; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--hint); background: var(--bg); color: var(--text); font-size: .9rem; }
+  .chat button { padding: 9px 14px; border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-text); }
+  .answer { margin-top: 8px; font-size: .9rem; line-height: 1.45; white-space: pre-wrap; }
+  .answer small { color: var(--hint); }
+</style>
+</head>
+<body>
+  <h1>🌿 Cucumber Sensors</h1>
+  <div class="sub" id="hello">กำลังโหลด...</div>
+
+  <div class="grid" id="cards"></div>
+
+  <div class="range" id="range"></div>
+
+  <div class="panel"><h2>🌡 อุณหภูมิ (HTS221, °C)</h2><svg id="chart-temp" viewBox="0 0 300 90" preserveAspectRatio="none"></svg></div>
+  <div class="panel"><h2>💧 ความชื้น (%)</h2><svg id="chart-humid" viewBox="0 0 300 90" preserveAspectRatio="none"></svg></div>
+
+  <div class="panel ai">
+    <h2>🤖 AI ผู้ช่วย</h2>
+    <div id="badges"><span class="badge wait">กำลังตรวจความผิดปกติ...</span></div>
+    <div class="chat"><input id="q" placeholder="ถามได้ เช่น ตอนนี้ร้อนไหม" maxlength="200"><button id="ask">ถาม</button></div>
+    <div class="answer" id="answer"></div>
+  </div>
+
+  <div class="foot"><span id="who">ยังไม่ได้ตรวจสอบผู้ใช้</span> · <span id="updated"></span></div>
+
+<script>
+const tg = window.Telegram && Telegram.WebApp;
+// ?api=https://your-gateway  -> lets the same page run from GitHub Pages and talk to your own gateway
+const API = (new URLSearchParams(location.search).get('api') || '').replace(/\/$/, '');
+const H = {'ngrok-skip-browser-warning': '1'};
+const NODES = {
+  1: {name: "BMP280 อุณหภูมิ", unit: "°C"},
+  2: {name: "BMP280 ความดัน", unit: "hPa"},
+  3: {name: "HTS221 อุณหภูมิ", unit: "°C"},
+  4: {name: "HTS221 ความชื้น", unit: "%"},
+};
+const TEMP_ALERT = 38;       // card turns red above this
+let minutes = 30;
+let wasHot = false;
+
+if (tg) { tg.ready(); tg.expand(); }
+
+// --- UI skeleton ---
+const cards = document.getElementById('cards');
+for (const id in NODES) {
+  cards.insertAdjacentHTML('beforeend',
+    `<div class="card" id="c${id}"><div class="name">${NODES[id].name}</div>
+     <div><span class="val" id="v${id}">–</span><span class="unit">${NODES[id].unit}</span></div>
+     <div class="age" id="a${id}">รอข้อมูล</div></div>`);
+}
+const rangeEl = document.getElementById('range');
+for (const [m, label] of [[10, '10 นาที'], [30, '30 นาที'], [60, '1 ชม.'], [180, '3 ชม.']]) {
+  const b = document.createElement('button');
+  b.textContent = label; b.dataset.m = m;
+  b.onclick = () => { minutes = m; markRange(); load(); tg && tg.HapticFeedback.selectionChanged(); };
+  rangeEl.appendChild(b);
+}
+function markRange() {
+  for (const b of rangeEl.children) b.classList.toggle('on', +b.dataset.m === minutes);
+}
+markRange();
+
+// --- helpers ---
+const utc = ts => new Date(ts.replace(' ', 'T') + 'Z');
+function ago(ts) {
+  const s = Math.max(0, Math.round((Date.now() - utc(ts).getTime()) / 1000));
+  return s < 60 ? s + ' วินาทีที่แล้ว' : Math.round(s / 60) + ' นาทีที่แล้ว';
+}
+function drawLine(svgId, pts, color) {
+  const svg = document.getElementById(svgId);
+  if (pts.length < 2) { svg.innerHTML = '<text x="150" y="48" text-anchor="middle" fill="gray" font-size="11">ยังไม่มีข้อมูลในช่วงนี้</text>'; return; }
+  const xs = pts.map(p => utc(p[0]).getTime()), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let y0 = Math.min(...ys), y1 = Math.max(...ys);
+  if (y1 - y0 < 0.5) { y0 -= 0.25; y1 += 0.25; }
+  const X = x => 4 + (x - x0) / Math.max(1, x1 - x0) * 292;
+  const Y = y => 80 - (y - y0) / (y1 - y0) * 70;
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + X(xs[i]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
+  svg.innerHTML =
+    `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>` +
+    `<text x="2" y="9" font-size="9" fill="gray">${y1.toFixed(1)}</text>` +
+    `<text x="2" y="88" font-size="9" fill="gray">${y0.toFixed(1)}</text>`;
+}
+
+// --- data ---
+async function load() {
+  try {
+    const r = await fetch(API + '/api/summary?minutes=' + minutes, {headers: H});
+    const d = await r.json();
+    for (const id in NODES) {
+      const it = d.latest[id];
+      if (!it) continue;
+      document.getElementById('v' + id).textContent = Number(it.value).toFixed(id == 2 ? 1 : 2);
+      document.getElementById('a' + id).textContent = 'อัปเดต ' + ago(it.ts);
+      const stale = (Date.now() - utc(it.ts).getTime()) > 30000;
+      document.getElementById('c' + id).classList.toggle('stale', stale);
+    }
+    const t = d.latest[3] && d.latest[3].value;
+    const hot = t !== undefined && t >= TEMP_ALERT;
+    document.getElementById('c3').classList.toggle('hot', hot);
+    if (hot && !wasHot && tg) tg.HapticFeedback.notificationOccurred('warning');
+    wasHot = hot;
+    drawLine('chart-temp', d.series[3], '#f97316');
+    drawLine('chart-humid', d.series[4], '#38bdf8');
+    document.getElementById('updated').textContent = 'รีเฟรช ' + new Date().toLocaleTimeString('th-TH', {hour12: false});
+  } catch (e) {
+    document.getElementById('updated').textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้';
+  }
+}
+
+// --- who is using the app? Ask the server to validate Telegram's signed initData ---
+async function whoAmI() {
+  const hello = document.getElementById('hello'), who = document.getElementById('who');
+  if (!tg || !tg.initData) { hello.textContent = 'เปิดนอก Telegram (โหมดเบราว์เซอร์)'; return; }
+  hello.textContent = 'สวัสดี ' + (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : '');
+  try {
+    const r = await fetch(API + '/api/verify', {method: 'POST', headers: {'Content-Type': 'application/json', ...H},
+                                          body: JSON.stringify({initData: tg.initData})});
+    if (r.ok) { who.textContent = '✔ เซิร์ฟเวอร์ยืนยันผู้ใช้แล้ว'; who.className = 'ok'; }
+    else who.textContent = '✖ ยืนยันผู้ใช้ไม่ผ่าน (' + r.status + ')';
+  } catch (e) { who.textContent = 'ยืนยันผู้ใช้ไม่ได้'; }
+}
+
+// Main button = manual refresh (Telegram-native button at the bottom)
+if (tg) {
+  tg.MainButton.setText('รีเฟรช');
+  tg.MainButton.onClick(() => { load(); tg.HapticFeedback.impactOccurred('light'); });
+  tg.MainButton.show();
+}
+
+// --- AI #1: anomaly detection (statistics) ---
+async function loadAnomaly() {
+  try {
+    const d = await (await fetch(API + '/api/anomaly?minutes=60', {headers: H})).json();
+    const box = document.getElementById('badges'); box.innerHTML = '';
+    for (const r of d.results) {
+      const s = document.createElement('span');
+      if (r.status === 'not_enough_data') { s.className = 'badge wait'; s.textContent = r.name + ': รอข้อมูลเพิ่ม'; }
+      else if (r.status === 'anomaly') { s.className = 'badge bad'; s.textContent = '⚠ ' + r.name + (r.direction === 'up' ? ' สูงผิดปกติ' : ' ต่ำผิดปกติ'); }
+      else { s.className = 'badge'; s.textContent = '✔ ' + r.name + ' ปกติ'; }
+      box.appendChild(s);
+    }
+  } catch (e) { /* keep last badges */ }
+}
+
+// --- AI #2: chat about the sensors ---
+async function ask() {
+  const q = document.getElementById('q').value.trim(), out = document.getElementById('answer');
+  if (!q) return;
+  out.textContent = 'กำลังคิด...';
+  try {
+    const r = await fetch(API + '/api/ask', {method: 'POST', headers: {'Content-Type': 'application/json', ...H},
+                                             body: JSON.stringify({question: q})});
+    const d = await r.json();
+    out.innerHTML = '';
+    out.append(d.answer, document.createElement('br'));
+    const src = document.createElement('small');
+    src.textContent = d.source === 'llm' ? 'ตอบโดย LLM' : 'ตอบโดยกฎง่ายๆ (ไม่ได้ต่อ LLM)';
+    out.appendChild(src);
+  } catch (e) { out.textContent = 'ถามไม่สำเร็จ ลองใหม่อีกครั้ง'; }
+}
+document.getElementById('ask').onclick = ask;
+document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
+
+whoAmI(); load(); loadAnomaly();
+setInterval(load, 3000);
+setInterval(loadAnomaly, 15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 AI ตรวจความผิดปกติ · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html" class=on>5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>5 AI ตรวจความผิดปกติ</h1>
+<p>AI ไม่จำเป็นต้องเป็นโมเดลยักษ์ แค่ <b>สถิติ</b> ก็ตรวจความผิดปกติของเซนเซอร์ได้ และอธิบายให้เข้าใจได้ทุกขั้น</p>
+<h2>ไอเดีย</h2>
+<ol>
+<li>เก็บค่าย้อนหลัง 60 นาที แบ่งเป็น <b>ช่วงอ้างอิง</b> (80% แรก) กับ <b>ช่วงล่าสุด</b> (20% หลัง)</li>
+<li>หาค่าเฉลี่ย (mean) และความแกว่งปกติ (std) ของช่วงอ้างอิง</li>
+<li>คำนวณ <b>z = (เฉลี่ยช่วงล่าสุด − เฉลี่ยช่วงอ้างอิง) ÷ std</b></li>
+<li>ถ้า |z| มากกว่า 3 แปลว่าค่าห่างจากปกติมาก ให้เตือน</li>
+</ol>
+<h2>ตัวอย่างคิดมือ</h2>
+<p>ปกติอุณหภูมิ 30.0 °C แกว่ง ±0.2 แล้วค่าล่าสุดเฉลี่ย 31.0 °C → z = (31.0 − 30.0) ÷ 0.2 = <b>5</b> มากกว่า 3 → เตือน
+แต่ถ้าล่าสุด 30.3 °C → z = 1.5 ยังปกติ</p>
+<p>โค้ดจริงอยู่ที่ <code>detect_anomalies()</code> ใน <code>gateway/mqtt_collector/ai_helpers.py</code> เรียกดูผลได้ที่</p>
+<pre><code>curl &#x27;localhost:5001/api/anomaly?minutes=60&#x27;</code></pre>
+<figure><img src="../assets/ui-simulated.png" alt="หน้าเว็บแสดงป้ายเตือนอุณหภูมิสูงผิดปกติ" style="max-width:320px;border-radius:12px;border:1px solid var(--line)">
+<figcaption><small>ภาพตัวอย่างจาก <b>ข้อมูลจำลอง</b> (ส่ง 40 ค่าปกติ ตามด้วย 10 ค่าที่อุณหภูมิสูงขึ้น) ป้าย AI เตือนทั้งอุณหภูมิและความชื้น</small></figcaption></figure>
+<h2>ลองทำ</h2>
+<ol>
+<li>เปิดหน้าเว็บ ให้บอร์ดทำงานอย่างน้อย 10 นาทีเพื่อให้มีข้อมูลอ้างอิง</li>
+<li>เอาไดร์เป่าผมเป่าใส่เซนเซอร์ (ห่างๆ) 1–2 นาที แล้วดูป้าย AI</li>
+<li>ลองเปลี่ยน <code>z_limit</code> จาก 3 เป็น 2 แล้วทดสอบอีกครั้ง เตือนไวขึ้นหรือช้าลง มีเตือนผิดบ่อยขึ้นไหม</li>
+</ol>
+<div class="try"><b>คิดต่อ</b> ทำไมต้องกำหนดค่า std ขั้นต่ำ (<code>MIN_STD</code>) ถ้าไม่กำหนด แล้วห้องเงียบมากจนค่าแทบไม่แกว่ง จะเกิดอะไรขึ้น</div>
+<h2>ข้อจำกัด</h2>
+<p>วิธีนี้เทียบกับ "เมื่อกี้" เท่านั้น ถ้าอุณหภูมิค่อยๆ เพิ่มช้ามากทั้งวันจะไม่เตือน และถ้าช่วงอ้างอิงมีเหตุการณ์ผิดปกติปนอยู่ ค่า std จะบวม ทำให้ตรวจไม่ไว
+นี่คือสิ่งที่ AI ทุกแบบมี: ทำงานได้ดีภายใต้สมมติฐานบางอย่าง</p>
+<div class="steps"><a href="4-ui.html">← บทก่อนหน้า</a><a href="6-ai-chat.html" style="margin-left:auto">บทถัดไป →</a></div></main></body></html>

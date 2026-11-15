@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สำหรับครู · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="index.html">หน้าแรก</a><a href="lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="teachers.html" class=on>สำหรับครู</a><a href="ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>สำหรับครู</h1>
+<h2>แผนการสอน 3 ชั่วโมง</h2>
+<table>
+<tr><th>เวลา</th><th>กิจกรรม</th><th>บท</th></tr>
+<tr><td>20 นาที</td><td>บรรยายสั้น: IoT/AI คืออะไร ดูตัวอย่างหน้าเว็บ</td><td>0–1</td></tr>
+<tr><td>40 นาที</td><td>อัปโหลดโปรแกรมลงบอร์ด ดูค่าใน Serial Monitor</td><td>2</td></tr>
+<tr><td>30 นาที</td><td>เปิด gateway ดูข้อมูลบนหน้าเว็บ/Telegram</td><td>3–4</td></tr>
+<tr><td>40 นาที</td><td>กิจกรรม z-score: เป่าไดร์ ปรับ <code>z_limit</code> แล้วสังเกต</td><td>5</td></tr>
+<tr><td>30 นาที</td><td>ถาม LLM ทดสอบคำถามที่ตอบได้/ไม่ได้ อภิปรายข้อจำกัด</td><td>6</td></tr>
+<tr><td>20 นาที</td><td>สรุป ตอบคำถาม</td><td></td></tr>
+</table>
+<h2>เตรียมก่อนคาบ</h2>
+<ul>
+<li>รัน gateway หนึ่งเครื่องต่อกลุ่ม (หรือหนึ่งเครื่องทั้งห้อง) และเช็กว่า WiFi 2.4 GHz ใช้ได้</li>
+<li>ถ้าห้องมี WiFi ที่บล็อกอุปกรณ์คุยกัน ให้ใช้ฮอตสปอตมือถือแทน</li>
+<li>เตรียม <code>devices/simulator.py</code> ไว้ให้กลุ่มที่บอร์ดไม่พอ</li>
+<li>เปิด Colab ล่วงหน้า 10 นาที โมเดลโหลดครั้งแรกใช้เวลา</li>
+</ul>
+<h2>เกณฑ์ประเมินเสนอ</h2>
+<ul>
+<li>อธิบายได้ว่าข้อมูลเดินทางจากบอร์ดไปหน้าเว็บอย่างไร (วาดแผนภาพ)</li>
+<li>อธิบายได้ว่า z-score บอกอะไร และตั้ง <code>z_limit</code> แล้วเกิดอะไรขึ้น</li>
+<li>ยกตัวอย่างคำถามที่ LLM ควรปฏิเสธ/บอกว่าไม่รู้ พร้อมเหตุผล</li>
+</ul>
+<h2>ปัญหาที่เจอบ่อย</h2>
+<table>
+<tr><th>อาการ</th><th>สาเหตุ/วิธีแก้</th></tr>
+<tr><td>หน้าเว็บไม่มีค่า</td><td>บอร์ดยังไม่ต่อ WiFi/MQTT: ดู Serial Monitor และตรวจ IP ใน <code>Config.h</code></td></tr>
+<tr><td><code>docker</code> ค้าง</td><td>Docker Desktop ยังไม่พร้อม หรือดิสก์เต็ม: รีสตาร์ท Docker และเคลียร์พื้นที่</td></tr>
+<tr><td>Telegram เปิดหน้าเปล่า</td><td><code>MINIAPP_URL</code> ต้องเป็น https และลิงก์ ngrok ยังไม่หมดอายุ</td></tr>
+<tr><td>AI ตอบ "กฎง่ายๆ" ตลอด</td><td>ลิงก์ Colab หมดอายุหรือยังไม่ได้ใส่ <code>OLLAMA_URL</code></td></tr>
+</table>
+<h2>ความปลอดภัยและข้อมูลส่วนบุคคล</h2>
+<ul>
+<li>Mosquitto ในโปรเจกต์เปิดแบบไม่ต้องล็อกอิน เหมาะกับห้องเรียนเท่านั้น อย่าเปิด port 1883 สู่อินเทอร์เน็ต</li>
+<li>เก็บ token/รหัส WiFi ใน <code>.env</code> และ <code>secrets.h</code> ซึ่งไม่ถูกอัปโหลดขึ้น GitHub</li>
+<li>ข้อมูลที่เก็บเป็นค่าสภาพอากาศเท่านั้น ไม่มีข้อมูลระบุตัวบุคคล</li>
+</ul>
+</main></body></html>

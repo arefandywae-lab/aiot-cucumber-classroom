@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 ต่อบอร์ด Cucumber · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html" class=on>2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>2 ต่อบอร์ด Cucumber</h1>
+<p>โปรแกรมของบอร์ดอยู่ในโฟลเดอร์ <code>devices/cucumber/</code> ใช้ PlatformIO (ปลั๊กอินของ VS Code หรือ <code>pip install platformio</code>)</p>
+<h2>ขั้นที่ 1: ตั้งค่า WiFi และที่อยู่ gateway</h2>
+<p>แก้ <code>devices/cucumber/include/Config.h</code> ใส่ชื่อ WiFi และ IP ของคอมพิวเตอร์ที่จะรัน gateway
+(Mac: <code>ipconfig getifaddr en0</code> หรือ <code>en1</code>)</p>
+<pre><code>#define WIFI_SSID        &quot;YOUR_WIFI_NAME&quot;
+#define MQTT_BROKER_IP   &quot;192.168.1.100&quot;</code></pre>
+<p>คัดลอก <code>secrets.h.example</code> เป็น <code>secrets.h</code> แล้วใส่รหัส WiFi
+(ไฟล์นี้ถูกกันไว้ไม่ให้ขึ้น GitHub จะได้ไม่หลุดรหัสผ่าน)</p>
+<h2>ขั้นที่ 2: อัปโหลด</h2>
+<pre><code>cd devices/cucumber
+pio run -t upload
+pio device monitor</code></pre>
+<p>ใน Serial Monitor ควรเห็นบรรทัดแบบนี้ทุก 3 วินาที</p>
+<pre><code>[Sensor] BMP280: T=29.86 C, P=1009.86 hPa | HTS221: T=29.33 C, RH=60.34 %
+[MQTT] Published -&gt; /cn466/data: {&quot;node&quot;:1,&quot;value&quot;:29.86}</code></pre>
+<h2>ถ้าไม่ขึ้น</h2>
+<ul>
+<li><b>อัปโหลดไม่ได้ / พอร์ตหาย</b> กดปุ่ม BOOT ค้างไว้ แล้วกด RESET หนึ่งครั้ง จากนั้นสั่งอัปโหลดใหม่</li>
+<li><b>ต่อ WiFi ไม่ได้</b> ตรวจว่าเป็นคลื่น 2.4 GHz และรหัสถูกต้อง</li>
+<li><b>ต่อ MQTT ไม่ได้</b> IP ใน <code>Config.h</code> ต้องตรงกับคอมพิวเตอร์ และไฟร์วอลล์ต้องไม่บล็อก port 1883</li>
+</ul>
+<div class="try"><b>ไม่มีบอร์ด?</b> ข้ามไปบทที่ 3 แล้วใช้ <code>python3 devices/simulator.py 30 1013 60</code> แทน (อุณหภูมิ ความดัน ความชื้น)</div>
+<div class="steps"><a href="1-sensors.html">← บทก่อนหน้า</a><a href="3-gateway.html" style="margin-left:auto">บทถัดไป →</a></div></main></body></html>

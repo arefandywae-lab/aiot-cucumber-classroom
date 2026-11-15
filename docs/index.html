@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIoT Cucumber Classroom · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="index.html" class=on>หน้าแรก</a><a href="lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="teachers.html">สำหรับครู</a><a href="ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>AIoT Cucumber Classroom</h1>
+<p class="lead">เรียนรู้ AIoT แบบลงมือทำ: ให้บอร์ด <b>Cucumber</b> วัดอุณหภูมิ ความชื้น และความดันอากาศ
+ส่งข้อมูลขึ้นหน้าเว็บ/Telegram แล้วให้ <b>AI</b> ช่วยบอกว่าอะไรผิดปกติ และตอบคำถามเป็นภาษาไทย</p>
+<p>เหมาะกับ <b>นักเรียนมัธยมปลาย</b> (ไม่ต้องเคยเขียนโปรแกรมมาก่อน) ใช้เวลาประมาณ 3 ชั่วโมง</p>
+
+<h2>ระบบทำงานอย่างไร</h2>
+<div class="flow">
+  <div>🌡 <b>บอร์ด Cucumber</b><small>อ่านเซนเซอร์ทุก 3 วินาที</small></div><span>→ WiFi/MQTT →</span>
+  <div>🖥 <b>Gateway</b><small>เก็บข้อมูล + API (Docker)</small></div><span>→</span>
+  <div>🤖 <b>AI</b><small>ตรวจผิดปกติ + แชท LLM (Colab)</small></div><span>→</span>
+  <div>📱 <b>UI</b><small>หน้าเว็บ หรือ Telegram</small></div>
+</div>
+
+<h2>ลองใช้งานหน้าเว็บ</h2>
+<p>หน้าเว็บนี้เชื่อมกับ gateway ของคุณเอง ใส่ URL ของ gateway (เช่นจาก ngrok) แล้วกดเปิด
+ถ้ายังไม่มี gateway ให้ทำบทที่ 3 ก่อน</p>
+<form class="launch" onsubmit="event.preventDefault();var u=this.api.value.trim();location.href='app/'+(u?'?api='+encodeURIComponent(u):'');">
+  <input name="api" placeholder="https://xxxx.ngrok-free.app" aria-label="URL ของ gateway">
+  <button>เปิดหน้าเว็บ</button>
+</form>
+
+<h2>บทเรียน</h2>
+<ol class="toc">
+  <li><a href="lessons/0-start.html">เริ่มต้นกับ AIoT</a> — IoT คืออะไร AI เข้ามาช่วยตรงไหน</li>
+  <li><a href="lessons/1-sensors.html">เซนเซอร์วัดอะไรได้</a> — BMP280 และ HTS221</li>
+  <li><a href="lessons/2-board.html">ต่อบอร์ด Cucumber</a> — อัปโหลดโปรแกรมลงบอร์ด</li>
+  <li><a href="lessons/3-gateway.html">ส่งข้อมูลผ่าน MQTT</a> — เปิด gateway ด้วย Docker</li>
+  <li><a href="lessons/4-ui.html">หน้าเว็บและ Telegram</a> — ดูข้อมูลบนมือถือ</li>
+  <li><a href="lessons/5-ai-anomaly.html">AI ตรวจความผิดปกติ</a> — สถิติ z-score</li>
+  <li><a href="lessons/6-ai-chat.html">AI แชทบน Colab</a> — ถามบอร์ดเป็นภาษาไทย</li>
+</ol>
+
+<h2>ตัวเลือกตามอุปกรณ์ที่มี</h2>
+<table>
+<tr><th></th><th>ตัวเลือก</th></tr>
+<tr><td>ไม่มีบอร์ด</td><td>ใช้ <code>devices/simulator.py</code> ส่งข้อมูลจำลองเข้า gateway แทนบอร์ด</td></tr>
+<tr><td>AI ไม่ต้องใช้อินเทอร์เน็ต</td><td>ตัวตรวจผิดปกติและคำตอบแบบกฎง่ายๆ ทำงานบนเครื่องเอง ไม่ต้องมี LLM</td></tr>
+<tr><td>AI แบบ LLM</td><td>รันบน Google Colab (ไม่ต้องมี GPU เอง) หรือรัน Ollama บนคอมพิวเตอร์เอง</td></tr>
+<tr><td>UI</td><td>หน้าเว็บของโปรเจกต์ หรือ Telegram Mini App ใช้ gateway ตัวเดียวกัน</td></tr>
+</table>
+</main></body></html>

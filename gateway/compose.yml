@@ -1,0 +1,17 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt_broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  mqtt_collector:
+    build: ./mqtt_collector
+    ports:
+      - "5001:5000"   # เครื่องคุณ :5001 -> container :5000 (macOS ใช้ 5000 อยู่แล้ว)
+    env_file:
+      - path: .env
+        required: false   # ไม่มี .env ก็ใช้ได้ (แค่ไม่มีบอท Telegram / ไม่ต่อ LLM)
+    volumes:
+      - ./bot_data:/usr/src/app/bot_data

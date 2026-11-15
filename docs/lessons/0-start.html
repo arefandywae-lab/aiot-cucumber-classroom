@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 เริ่มต้นกับ AIoT · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html" class=on>0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>0 เริ่มต้นกับ AIoT</h1>
+<p><b>IoT</b> (Internet of Things) คือสิ่งของที่มีเซนเซอร์และต่อเน็ตได้ ส่วน <b>AI</b> คือโปรแกรมที่ "เรียนรู้หรือตัดสินใจ" จากข้อมูล
+เมื่อรวมกันเป็น <b>AIoT</b> เราจะได้ระบบที่ไม่ได้แค่วัดค่า แต่ช่วยตีความให้ด้วย</p>
+<h2>เราจะสร้างอะไร</h2>
+<ul>
+<li>สถานีวัดอากาศในห้องเรียน อ่านค่าทุก 3 วินาที</li>
+<li>หน้าเว็บ/Telegram แสดงค่าและกราฟ</li>
+<li>AI 2 แบบ: (1) ตรวจว่าค่าผิดปกติไหม (2) ตอบคำถามเช่น "ตอนนี้ร้อนไหม"</li>
+</ul>
+<h2>ของที่ต้องมี</h2>
+<table>
+<tr><th>รายการ</th><th>หมายเหตุ</th></tr>
+<tr><td>บอร์ด Cucumber R (ESP32-S2) พร้อมเซนเซอร์ BMP280, HTS221</td><td>ไม่มีก็ใช้ตัวจำลองได้</td></tr>
+<tr><td>คอมพิวเตอร์ (Mac/Windows/Linux) ติดตั้ง Docker และ Python 3.10+</td><td>ใช้เป็น gateway</td></tr>
+<tr><td>WiFi 2.4 GHz ที่บอร์ดและคอมพิวเตอร์อยู่วงเดียวกัน</td><td>บอร์ดต่อ 5 GHz ไม่ได้</td></tr>
+<tr><td>บัญชี Google (สำหรับ Colab) และ Telegram (ถ้าอยากใช้บนมือถือ)</td><td>ไม่บังคับ</td></tr>
+</table>
+<h2>ดาวน์โหลดโปรเจกต์</h2>
+<pre><code>git clone https://github.com/arefandywae-lab/aiot-cucumber-classroom
+cd aiot-cucumber-classroom</code></pre><div class="steps"><a href="1-sensors.html" style="margin-left:auto">บทถัดไป →</a></div></main></body></html>

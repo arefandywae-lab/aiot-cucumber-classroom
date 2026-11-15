@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ทำงานกับ AI อย่างไร (flow สั่งงานและตรวจงาน) · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="index.html">หน้าแรก</a><a href="lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="lessons/3-gateway.html">3 ส่งข้อมูลผ่าน MQTT</a><a href="lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="teachers.html">สำหรับครู</a><a href="ai-workflow.html" class=on>ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>ทำงานกับ AI อย่างไร (flow สั่งงานและตรวจงาน)</h1>
+<p>โปรเจกต์นี้พัฒนาโดยมี AI (Claude Code) เป็นผู้ช่วยเขียนโค้ดและเอกสาร ส่วนนี้สรุป <b>วิธีสั่งและวิธีตรวจ</b>
+เพราะการเชื่อผลของ AI โดยไม่ตรวจเป็นความเสี่ยงที่ใหญ่ที่สุด</p>
+<div class="flow">
+  <div><b>1 กำหนดโจทย์</b><small>เป้าหมาย กลุ่มเป้าหมาย ข้อจำกัด</small></div><span>→</span>
+  <div><b>2 ให้ AI สำรวจ</b><small>อ่านโค้ด/ตัวอย่างที่มี ก่อนเขียน</small></div><span>→</span>
+  <div><b>3 ให้ AI ลงมือ</b><small>ทีละชิ้นเล็กๆ</small></div><span>→</span>
+  <div><b>4 ตรวจ</b><small>เทสต์ + ของจริง</small></div><span>→</span>
+  <div><b>5 แก้/ถามต่อ</b><small>วนกลับ</small></div>
+</div>
+<h2>ตัวอย่างการสั่งงานจริงในโปรเจกต์นี้</h2>
+<table>
+<tr><th>ขั้น</th><th>สิ่งที่สั่ง</th><th>สิ่งที่ตรวจ</th></tr>
+<tr><td>กำหนดโจทย์</td><td>ส่งข้อกำหนดงาน + เลือก: กลุ่มเป้าหมาย ม.ปลาย, AI ทั้งตรวจผิดปกติและแชท, ใช้ Colab, UI ทั้งเว็บและ Telegram</td><td>เลือกเองทุกข้อ ไม่ปล่อยให้ AI เดา</td></tr>
+<tr><td>สำรวจ</td><td>"ดูไฟล์ใน demo_05_iot ว่ามีอะไรให้ใช้ซ้ำ"</td><td>เช็กว่ามี token/รหัสผ่านติดไฟล์ไหมก่อนขึ้น GitHub</td></tr>
+<tr><td>เขียนโค้ด AI</td><td>สร้าง <code>ai_helpers.py</code> (z-score + แชท + fallback)</td><td>เขียน unit test 6 ข้อ รันผ่าน (<code>pytest tests</code>)</td></tr>
+<tr><td>ทดสอบจริง</td><td>แฟลชบอร์ด รัน Docker เปิด Telegram</td><td>ดู Serial Monitor, log ของ broker, หน้าจอ Telegram จริง</td></tr>
+<tr><td>ส่วนที่ทำไม่ได้</td><td>Colab notebook</td><td>AI ไม่มีบัญชี Colab ให้ทดสอบ จึงบอกตรงๆ ว่ายังไม่ได้รันจริง ให้ครูลองก่อนใช้</td></tr>
+</table>
+<h2>กฎที่ใช้ตรวจงาน AI</h2>
+<ol>
+<li><b>ให้ AI บอกว่าทดสอบอะไรไปแล้ว/ยังไม่ได้ทดสอบอะไร</b> และไม่เชื่อคำว่า "น่าจะใช้ได้"</li>
+<li><b>ของที่มีผลภายนอกต้องถามก่อน</b> เช่น เขียนทับโปรแกรมในบอร์ด (AI ถามก่อนแฟลช) หรืออัปโหลดขึ้นอินเทอร์เน็ต</li>
+<li><b>ความลับไม่ผ่านแชท/ไม่ขึ้น GitHub</b> ใช้ <code>.env</code> และ <code>.gitignore</code></li>
+<li><b>ให้ AI อธิบายโค้ดที่เขียน</b> ถ้าอธิบายให้เพื่อนฟังไม่ได้ แปลว่ายังไม่เข้าใจพอจะส่งงาน</li>
+<li><b>เปิดดูของจริง</b> ตัวเลขจากบอร์ด หน้าจอจริง ไม่ใช่แค่ดูข้อความที่ AI รายงาน</li>
+</ol>
+<h2>โครงสร้างโปรเจกต์</h2>
+<pre><code>devices/      โปรแกรมบอร์ด Cucumber + ตัวจำลองข้อมูล
+gateway/      Docker: Mosquitto + REST API + หน้าเว็บ/Telegram
+ai/colab/     โน้ตบุ๊กรัน LLM บน Colab
+docs/         เว็บคอร์สนี้ (GitHub Pages) สร้างจาก tools/build_site.py
+tests/        unit test ของส่วน AI</code></pre></main></body></html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 ส่งข้อมูลผ่าน MQTT · AIoT Cucumber Classroom</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body><nav><div class="brand">🥒 AIoT Cucumber<br><small>Classroom</small></div><a href="../index.html">หน้าแรก</a><a href="../lessons/0-start.html">0 เริ่มต้นกับ AIoT</a><a href="../lessons/1-sensors.html">1 เซนเซอร์วัดอะไรได้</a><a href="../lessons/2-board.html">2 ต่อบอร์ด Cucumber</a><a href="../lessons/3-gateway.html" class=on>3 ส่งข้อมูลผ่าน MQTT</a><a href="../lessons/4-ui.html">4 หน้าเว็บและ Telegram</a><a href="../lessons/5-ai-anomaly.html">5 AI ตรวจความผิดปกติ</a><a href="../lessons/6-ai-chat.html">6 AI แชทบน Colab</a><a href="../teachers.html">สำหรับครู</a><a href="../ai-workflow.html">ทำงานกับ AI อย่างไร</a>
+<a class="ext" href="https://github.com/arefandywae-lab/aiot-cucumber-classroom">โค้ดบน GitHub ↗</a></nav>
+<main><h1>3 ส่งข้อมูลผ่าน MQTT</h1>
+<p><b>MQTT</b> เป็นเหมือน "ไปรษณีย์" ของ IoT: บอร์ดส่งข้อความเข้า <i>topic</i> (เหมือนตู้จดหมาย) ใครสนใจก็มา subscribe
+ตัวกลางเรียกว่า <b>broker</b> (เราใช้ Mosquitto) ข้อความของเราหน้าตาแบบนี้</p>
+<pre><code>topic:   /cn466/data
+payload: {&quot;node&quot;: 3, &quot;value&quot;: 29.33}</code></pre>
+<h2>เปิด gateway ด้วย Docker</h2>
+<p>gateway คือโปรแกรมที่รับข้อความ เก็บลงฐานข้อมูล และเปิด API ให้หน้าเว็บมาอ่าน</p>
+<pre><code>cd gateway
+cp .env.example .env     # ไม่ต้องแก้อะไรก็ใช้ได้
+docker compose up -d --build</code></pre>
+<p>ตรวจว่าทำงาน: เปิด <code>http://localhost:5001/app</code> หรือรัน</p>
+<pre><code>curl localhost:5001/api/summary</code></pre>
+<table>
+<tr><th>Endpoint</th><th>ทำอะไร</th></tr>
+<tr><td><code>GET /api/summary</code></td><td>ค่าล่าสุดของทุก node + ข้อมูลย้อนหลังสำหรับกราฟ</td></tr>
+<tr><td><code>GET /api/anomaly</code></td><td>AI ตรวจความผิดปกติ (บทที่ 5)</td></tr>
+<tr><td><code>POST /api/ask</code></td><td>AI แชท (บทที่ 6)</td></tr>
+</table>
+<h2>port สำคัญ</h2>
+<p>gateway ฟังที่ port 5000 ใน Docker แต่เรา map ออกมาเป็น <b>5001</b> บนเครื่อง เพราะ macOS ใช้ port 5000 อยู่แล้ว</p>
+<div class="try"><b>ลองทำ</b> ถ้าไม่มีบอร์ด รัน <code>python3 devices/simulator.py 30 1013 60</code> แล้วดูค่าใน <code>/api/summary</code> เปลี่ยน</div>
+<div class="steps"><a href="2-board.html">← บทก่อนหน้า</a><a href="4-ui.html" style="margin-left:auto">บทถัดไป →</a></div></main></body></html>
