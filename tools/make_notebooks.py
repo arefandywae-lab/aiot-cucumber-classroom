@@ -51,7 +51,8 @@ llm = [
 # 1) ตรวจว่าได้ GPU ไหม แล้วติดตั้ง Ollama
 import subprocess, shutil
 gpu = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True).stdout.strip()
-print(gpu or "⚠ ไม่เจอ GPU: เลือก Runtime → Change runtime type → T4 GPU ก่อน (ใช้ CPU ได้แต่ช้า)")
+print(gpu or "⚠ ไม่เจอ GPU! เมนู Runtime → Change runtime type → T4 GPU → Save แล้วรันเซลล์นี้ใหม่\\n"
+             "   (ถ้ารันต่อบน CPU โมเดล 3b จะช้ามาก ให้เลือกโมเดล qwen2.5:1.5b ในเซลล์ถัดไป)")
 !apt-get -qq install -y zstd > /dev/null
 !curl -fsSL https://ollama.com/install.sh | sh > /dev/null 2>&1
 print("ollama:", shutil.which("ollama") or "ติดตั้งไม่สำเร็จ")
@@ -59,28 +60,43 @@ print("ollama:", shutil.which("ollama") or "ติดตั้งไม่สำ
     code("""
 # 2) เปิดเซิร์ฟเวอร์ Ollama และดาวน์โหลดโมเดล (ครั้งแรกใช้เวลาสักครู่)
 MODEL = "qwen2.5:3b"  #@param ["qwen2.5:3b", "qwen2.5:1.5b", "gemma2:2b", "llama3.2:3b"]
-import subprocess, time, urllib.request
-server = subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+import os, subprocess, time, urllib.request, json
+os.environ["OLLAMA_KEEP_ALIVE"] = "2h"          # ไม่ให้โมเดลถูกถอนออกจากหน่วยความจำ
+server = subprocess.Popen(["ollama", "serve"], stdout=open("/tmp/ollama.log", "w"), stderr=subprocess.STDOUT)
 for _ in range(30):
     try:
         urllib.request.urlopen("http://localhost:11434/api/tags"); break
     except OSError:
         time.sleep(1)
 else:
-    raise RuntimeError("ollama serve ไม่ตอบ ลองรันเซลล์ 1 ใหม่")
+    raise RuntimeError("ollama serve ไม่ตอบ ดู log:\\n" + open("/tmp/ollama.log").read()[-1500:])
 !ollama pull {MODEL}
+
+# อุ่นเครื่อง: ครั้งแรกต้องโหลดโมเดลเข้า GPU ซึ่งช้ากว่าการตอบจริงมาก (ตั้ง timeout นานไว้)
+print("กำลังโหลดโมเดลเข้าหน่วยความจำ... (CPU อาจนาน 3-5 นาที, GPU ไม่เกิน 1 นาที)")
+t0 = time.time()
+warm = urllib.request.Request("http://localhost:11434/api/generate",
+        json.dumps({"model": MODEL, "prompt": "สวัสดี", "stream": False, "keep_alive": "2h",
+                    "options": {"num_predict": 5}}).encode(), {"Content-Type": "application/json"})
+try:
+    urllib.request.urlopen(warm, timeout=600).read()
+    print(f"โหลดเสร็จใน {time.time() - t0:.0f} วินาที")
+except Exception as e:
+    print("⚠ โหลดไม่สำเร็จ:", repr(e), "\\nlog ล่าสุด:\\n" + open("/tmp/ollama.log").read()[-1500:])
+!ollama ps
+print("ดูคอลัมน์ PROCESSOR: ต้องเป็น 100% GPU ถ้าเป็น CPU แปลว่ายังไม่ได้เลือก T4")
 """, "model"),
     code("""
 # 3) ทดสอบว่าโมเดลตอบได้ (ใช้ prompt แบบเดียวกับที่ gateway ส่ง)
 import json, urllib.request
 
-def ask_llm(question, context, system, model=MODEL):
+def ask_llm(question, context, system, model=MODEL, timeout=300):
     payload = {"model": model, "stream": False, "messages": [
         {"role": "system", "content": system},
         {"role": "user", "content": f"ข้อมูลเซนเซอร์ล่าสุด:\\n{context}\\n\\nคำถาม: {question}"}]}
     req = urllib.request.Request("http://localhost:11434/api/chat", json.dumps(payload).encode(),
                                  {"Content-Type": "application/json"})
-    return json.load(urllib.request.urlopen(req, timeout=120))["message"]["content"].strip()
+    return json.load(urllib.request.urlopen(req, timeout=timeout))["message"]["content"].strip()
 
 SYSTEM = ("คุณคือผู้ช่วยสอนวิทยาศาสตร์สำหรับนักเรียน ม.ปลาย ตอบเป็นภาษาไทย สั้น กระชับ เข้าใจง่าย "
           "ใช้เฉพาะข้อมูลเซนเซอร์ที่ให้มาเท่านั้น ถ้าข้อมูลไม่พอให้บอกตามตรง ห้ามเดาตัวเลข")
